@@ -61,94 +61,9 @@ void classifier::initcl()
     }
 }
 
-//void embed_gram(const cl_matrix<float>& k, const cl_matrix<float>& K, uint from_row, uint to_row)
-//{
-//    for (uint r = 0; r < ids.size(); r++)
-//        for (uint c = 0; c < ids.size(); c++)
-//            K(from_row + r, from_row + c) = k(r, c);
-//}
-
-//bool device_full(uint d, uint cols)
-//{
-//    uint n = device_samples[d].size() + 1;
-//    uint device_mem = it->getInfo<CL_DEVICE_GLOBAL_MEM_SIZE>();
-//    std::cout << device_mem << std::endl;
-//    return device_mem > sizeof(float) * (n * cols + (n * n + n)/2);
-//}
-
-//void clGramDevice(uint from_row, uint to_row,
-//                  const cl_matrix<float>& data,
-//                  cl_matrix<float>* gram,
-//                  const char* type,
-//                  float sigma = .5)
-//{
-//    uint rows = to_row - from_row;
-//    cl_matrix<float> working_mat(rows, data.cols), working_gram(rows, rows);
-//    memcpy(working_mat, &(data.data[from_row * data.cols]), sizeof(float) * data.cols * rows);
-//    embed_gram(working_gram, gram, from_row, to_row);
-//}
-
-//// Enqueue vectors to device as much as its memory can handle
-//// Make the queue async
-//// On each vector queued, get event
-//// Enqueue kernel with event of
-////
-
-//void clGram(const cl_matrix<float>& data,
-//            cl_matrix<float>* gram,
-//            const char* type,
-//            float sigma = .5)
-//{
-//    using namespace std;
-//    set<pair<uint, uint> > work;
-//    for (uint n = 0; n < data.rows; n++)
-//        for (uint k = 0; k <= n; k++)
-//            work.push_back(make_pair(n, k));
-//    rows_per_device uint[devices.size()];
-
-//    for (uint n = 0; n < devices.size(); n++)
-//        rows_per_device[n] = device_rows(n, cols);
-
-
-//    // n * cols + (n * n + n)/2 < devmem
-//    // n^2 + 2cols*n + 1 < 2devmem
-//    // n^2 + 2cols*n + 1 - 2devmem < 0
-//    // n^2 + 2cols*n + 1 - 2devmem = (n+cols-sqrt(cols^2-2mem))(n+cols+sqrt(cols^2-2mem)) < 0
-//    uint n = 0;
-//    while (n < data.rows)
-//    {
-//        uint lastn = n;
-//        for (uint d = 0; d < devices.size(); d++)
-//            if (!device_full(d, data.cols) && n < data.rows)
-//                device_samples.insert(n++);
-//        if (lastn == n) // all devices full or all work in
-//        {
-//            run_jobs();
-//            for (uint d = 0; d < devices.size(); d++)
-//                device_samples[d].clear();
-//        }
-//    }
-//}
-
-
-
-//void nanmat(cl_matrix<float>& x)
-//{
-//    for (uint n = 0; n < x.rows * x.cols; n++)
-//        x.data[n] = NAN;
-//}
-
-//std::set<std::pair<uint, uint> > findnan(const cl_matrix<float>& x)
-//{
-//    std::set<std::pair<uint, uint> > res;
-//    for (uint n = 0; n < x.rows * x.cols; n++)
-//        if (isnan(x.data[n]))
-//            res.push_back(make_pair(n / cols, n % cols));
-//    return res;
-//}
-
 #include <vexcl/vexcl.hpp>
 
+// http://stackoverflow.com/questions/21682012/gram-matrix-using-vexcl
 void clGram(//uint d, // device id
             const cl_matrix<float> data,
             cl_matrix<float>* _gram,
