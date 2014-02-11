@@ -78,8 +78,8 @@ void clGram(//uint d, // device id
     vex::vector<float> chunk1(ctx, m * n);
     vex::vector<float> chunk2(ctx, m * n);
 
-    vex::copy(std::vector<float>(data.data, &data.data[data.cols * data.rows - 1]), chunk1);
-    vex::copy(std::vector<float>(data.data, &data.data[data.cols * data.rows - 1]), chunk2);
+    vex::copy(std::vector<float>(data.data, &data.data[data.cols * data.rows]), chunk1);
+    vex::copy(std::vector<float>(data.data, &data.data[data.cols * data.rows]), chunk2);
 
     vex::vector<float> gram(ctx, m * m);
     using vex::extents;
@@ -88,8 +88,6 @@ void clGram(//uint d, // device id
     auto y = vex::reshape(chunk2, extents[m][m][n], extents[1][2]);
 
     std::cout<<"data:\n"<<(matrix)data<<std::endl;
-    std::cout<<"x:\n"<<vex::vector<float>(x)<<std::endl;
-    std::cout<<"y:\n"<<vex::vector<float>(y)<<std::endl;
 
     gram = vex::reduce<vex::SUM>(
                 extents[m][m][n],
@@ -98,28 +96,7 @@ void clGram(//uint d, // device id
                 );
     //gram = vex::exp(gram * gram * (-.5*sigma));
     std::cout<<"gram:\n"<<gram<<std::endl;
-    vex::copy(gram, _gram->data);
-
-//    return;
-//    try{
-//        assert(gram->cols == data.rows && gram->rows == data.rows);
-//        cl::Kernel kernel(program, strcmp(type, "linear") ? "gram_gauss" : "gram_linear");
-//        cl::Buffer cldata = cl::Buffer(context, CL_MEM_READ_WRITE, data.size());
-//        cl::Buffer clgram = cl::Buffer(context, CL_MEM_READ_WRITE, gram->size());
-//        queues[d].enqueueWriteBuffer(cldata, CL_TRUE, 0, data.size(), data.data);
-
-//        kernel.setArg(0, cldata);
-//        kernel.setArg(1, clgram);
-//        kernel.setArg(2, data.cols);
-//        kernel.setArg(3, type);
-//        kernel.setArg(4, sigma);
-
-//        cl::NDRange global(data.rows, data.rows);
-//        queues[d].enqueueNDRangeKernel(kernel, cl::NullRange, global);
-//        queues[d].enqueueReadBuffer(clgram, CL_TRUE, 0, gram->size(), gram->data);
-//    }catch(std::exception e){
-//        std::cout << "Line "<< __LINE__<<": Error in "<<e.what() <<std::endl;
-//    }
+    vex::copy<float>(gram, _gram->data);
 }
 
 scalar linear_kernel(const vector& x, const vector& y) { return x.dot(y); }
@@ -154,7 +131,8 @@ void classifier::run_test(
         matrix kk2(K2); std::cout<<"clgram:\n"<<kk2<<std::endl;
         std::cout<<"gram:\n"<<K<<std::endl;
     //    std::cout<<"\nx:\n"<<trainset.first<<std::endl;
-    std::cout<<"Diff G/C: "<<(K-matrix(K2)).norm()<<std::endl;
+    std::cout<<"G-C: "<<(K-matrix(K2))<<std::endl;
+    std::cout<<"||G/C||: "<<(K-matrix(K2)).norm()<<std::endl;
     peg(niters, lambda);
 }
 
