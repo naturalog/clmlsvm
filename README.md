@@ -1,6 +1,8 @@
 clmlsvm
 =======
 
-OpenCL Multi-label SVM
+OpenCL Multi-label Classification
 
-This software is not ready yet.
+Pegasos-SVM Based (see pdf)
+
+This software is not ready yet
