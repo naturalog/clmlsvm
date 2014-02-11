@@ -15,9 +15,9 @@
 #include <ctime>
 #include <stdexcept>
 
-cl::Context context;
-std::vector<cl::CommandQueue> queues;
-cl::Program program;
+//cl::Context context;
+//std::vector<cl::CommandQueue> queues;
+//cl::Program program;
 
 classifier::classifier()
 {
@@ -26,39 +26,39 @@ classifier::classifier()
 
 void classifier::initcl()
 {
-    cl_int status = 0;
-    context = cl::Context(CL_DEVICE_TYPE_GPU, 0, 0, 0, &status);
-    if (status != CL_SUCCESS)
-    {
-        std::cout<<"GPU not found, falling back to CPU!"<<std::endl;
-        context = cl::Context(CL_DEVICE_TYPE_CPU, 0, 0, 0, &status);
-        if (status != CL_SUCCESS)
-            throw std::runtime_error("Error: Creating context!");
-    }
+//    cl_int status = 0;
+//    context = cl::Context(CL_DEVICE_TYPE_GPU, 0, 0, 0, &status);
+//    if (status != CL_SUCCESS)
+//    {
+//        std::cout<<"GPU not found, falling back to CPU!"<<std::endl;
+//        context = cl::Context(CL_DEVICE_TYPE_CPU, 0, 0, 0, &status);
+//        if (status != CL_SUCCESS)
+//            throw std::runtime_error("Error: Creating context!");
+//    }
 
-    std::ifstream file(CLSOURCE);
-    std::string sourceCode(std::istreambuf_iterator<char>(file), (std::istreambuf_iterator<char>()));
-    cl::Program::Sources source(1, std::make_pair(sourceCode.c_str(), sourceCode.length() + 1));
-    program = cl::Program(context, source);
+//    std::ifstream file(CLSOURCE);
+//    std::string sourceCode(std::istreambuf_iterator<char>(file), (std::istreambuf_iterator<char>()));
+//    cl::Program::Sources source(1, std::make_pair(sourceCode.c_str(), sourceCode.length() + 1));
+//    program = cl::Program(context, source);
 
-    // Get a list of devices on this platform
-    std::vector<cl::Device> devices = context.getInfo<CL_CONTEXT_DEVICES>();
-    //if(devices.size() != 1) devices.erase(devices.begin() + 1, devices.end());
-    for (auto it = devices.begin(); it != devices.end(); it++)
-    {
-        std::cout<<it->getInfo<CL_DEVICE_NAME>()<<std::endl;
-        for (uint n = 0; n < devices.size(); n++)
-            queues.push_back(cl::CommandQueue(context, *it));
+//    // Get a list of devices on this platform
+//    std::vector<cl::Device> devices = context.getInfo<CL_CONTEXT_DEVICES>();
+//    //if(devices.size() != 1) devices.erase(devices.begin() + 1, devices.end());
+//    for (auto it = devices.begin(); it != devices.end(); it++)
+//    {
+//        std::cout<<it->getInfo<CL_DEVICE_NAME>()<<std::endl;
+//        for (uint n = 0; n < devices.size(); n++)
+//            queues.push_back(cl::CommandQueue(context, *it));
 
-        try
-        {
-            program.build(std::vector<cl::Device>(1,*it), "");
-        } catch(cl::Error e) {
-            std::cout << "Build Status: " << program.getBuildInfo<CL_PROGRAM_BUILD_STATUS>((*it)()) << std::endl
-                      << "Build Log:\t " << program.getBuildInfo<CL_PROGRAM_BUILD_LOG>((*it)()) << std::endl
-                      << e.what() << std::endl<< e.err() << std::endl;
-        }
-    }
+//        try
+//        {
+//            program.build(std::vector<cl::Device>(1,*it), "");
+//        } catch(cl::Error e) {
+//            std::cout << "Build Status: " << program.getBuildInfo<CL_PROGRAM_BUILD_STATUS>((*it)()) << std::endl
+//                      << "Build Log:\t " << program.getBuildInfo<CL_PROGRAM_BUILD_LOG>((*it)()) << std::endl
+//                      << e.what() << std::endl<< e.err() << std::endl;
+//        }
+//    }
 }
 
 #include <vexcl/vexcl.hpp>
