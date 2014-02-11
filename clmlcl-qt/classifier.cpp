@@ -63,6 +63,8 @@ void classifier::initcl()
 
 #include <vexcl/vexcl.hpp>
 
+vex::Context ctx(vex::Filter::Type(CL_DEVICE_TYPE_GPU) && vex::Filter::Count(1));
+
 // http://stackoverflow.com/questions/21682012/gram-matrix-using-vexcl
 void clGram(//uint d, // device id
             const cl_matrix<float> data,
@@ -70,9 +72,6 @@ void clGram(//uint d, // device id
             const char* type,
             float sigma)
 {
-    vex::Context ctx(vex::Filter::Type(CL_DEVICE_TYPE_GPU) && vex::Filter::Count(1));
-    if (!ctx) throw std::runtime_error("No devices available.");
-    std::cout << ctx << std::endl;
     uint m = data.rows, n = data.cols;
 
     vex::vector<float> chunk1(ctx, m * n);
@@ -87,7 +86,7 @@ void clGram(//uint d, // device id
     auto x = vex::reshape(chunk1, extents[m][m][n], extents[0][2]);
     auto y = vex::reshape(chunk2, extents[m][m][n], extents[1][2]);
 
-    std::cout<<"data:\n"<<(matrix)data<<std::endl;
+//    std::cout<<"data:\n"<<(matrix)data<<std::endl;
 
     gram = vex::reduce<vex::SUM>(
                 extents[m][m][n],
@@ -95,7 +94,7 @@ void clGram(//uint d, // device id
                 2
                 );
     //gram = vex::exp(gram * gram * (-.5*sigma));
-    std::cout<<"gram:\n"<<gram<<std::endl;
+//    std::cout<<"gram:\n"<<gram<<std::endl;
     vex::copy<float>(gram, _gram->data);
 }
 
@@ -122,16 +121,19 @@ void classifier::run_test(
     K = gram(trainset.first,
              kernel == "Linear" ? linear_kernel : gaussian_kernel,
              false);
-    std::cout<<"cpp gram: " << double(clock() - begin) / CLOCKS_PER_SEC << " sec"<<std::endl;
+    clock_t end = clock();
+    std::cout<<"cpp gram: " << double(end - begin) / CLOCKS_PER_SEC << " sec"<<std::endl;
     cl_matrix<float> K2(trainset.first.rows(), trainset.first.rows());
     begin = clock();
     clGram(trainset.first, &K2,
            kernel == "Linear" ? "linear" : "gauss", 1);
-    std::cout<<"cl gram: " << double(clock() - begin) / CLOCKS_PER_SEC << " sec"<<std::endl;
-        matrix kk2(K2); std::cout<<"clgram:\n"<<kk2<<std::endl;
-        std::cout<<"gram:\n"<<K<<std::endl;
+    end = clock();
+    std::cout<<"cl gram: " << double(end - begin) / CLOCKS_PER_SEC << " sec"<<std::endl;
+        matrix kk2(K2);
+        //std::cout<<"clgram:\n"<<kk2<<std::endl;
+        //std::cout<<"gram:\n"<<K<<std::endl;
     //    std::cout<<"\nx:\n"<<trainset.first<<std::endl;
-    std::cout<<"G-C: "<<(K-matrix(K2))<<std::endl;
+    //std::cout<<"G-C: "<<(K-matrix(K2))<<std::endl;
     std::cout<<"||G/C||: "<<(K-matrix(K2)).norm()<<std::endl;
     peg(niters, lambda);
 }
